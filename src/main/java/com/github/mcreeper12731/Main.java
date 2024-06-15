@@ -3,15 +3,15 @@ package com.github.mcreeper12731;
 import com.github.mcreeper12731.managers.StopManager;
 import com.github.mcreeper12731.managers.StopTimeManager;
 import com.github.mcreeper12731.managers.TripManager;
+import com.github.mcreeper12731.models.Result;
+import com.github.mcreeper12731.models.RouteArrivalTime;
 import com.github.mcreeper12731.models.enums.TimeFormat;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class Main {
 
@@ -35,16 +35,22 @@ public class Main {
 
         System.out.printf("Postajalisce %s%n", stopManager.getStop(stopId).stopName());
 
-        Map<Integer, List<LocalTime>> routeArrivalTimes = new HashMap<>();
-        stopTimeManager.getStopTimes(stopId, CURRENT_TIME).forEach(stopTime -> {
-            int routeId = tripManager.getTrip(stopTime.tripId()).routeId();
-            routeArrivalTimes.computeIfAbsent(routeId, k -> new ArrayList<>());
-            routeArrivalTimes.get(routeId).add(stopTime.arrivalTime());
+        List<Result> routeArrivalTimes = new LinkedList<>();
+
+        stopTimeManager.getStopTimes(stopId, CURRENT_TIME).stream().map(stopTime ->
+                new RouteArrivalTime(
+                    tripManager.getTrip(stopTime.tripId()).routeId(),
+                    stopTime.arrivalTime()
+                )
+        ).sorted().forEach(routeArrivalTime -> {
+            if (routeArrivalTimes.isEmpty() || routeArrivalTimes.get(routeArrivalTimes.size() - 1).routeId() != routeArrivalTime.routeId())
+                routeArrivalTimes.add(new Result(routeArrivalTime.routeId(), new LinkedList<>()));
+            routeArrivalTimes.get(routeArrivalTimes.size() - 1).arrivalTimes().add(routeArrivalTime.arrivalTime());
         });
 
-        routeArrivalTimes.forEach((routeId, arrivalTimes) -> {
-            System.out.printf("%d: ", routeId);
-            printSortedArrivalTimes(arrivalTimes, timeFormat, maxEntries);
+        routeArrivalTimes.forEach(result -> {
+            System.out.printf("%d: ", result.routeId());
+            printSortedArrivalTimes(result.arrivalTimes(), timeFormat, maxEntries);
             System.out.printf("%n");
         });
     }
