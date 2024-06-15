@@ -38,6 +38,6 @@ public class StopTimeManager {
 
     public List<StopTime> getStopTimes(int stopId, LocalTime currentTime) {
         return stopIdStopTimes.get(stopId).stream().filter(stopTime -> stopTime.arrivalTime().isAfter(currentTime) &&
-                stopTime.arrivalTime().isBefore(currentTime.plusHours(1))).toList();
+                stopTime.arrivalTime().isBefore(currentTime.plusHours(2))).toList();
     }
 }
