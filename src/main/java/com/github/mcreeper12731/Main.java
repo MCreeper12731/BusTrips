@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class Main {
 
-    static final LocalTime CURRENT_TIME = LocalTime.of(12, 0);
+    static final LocalTime CURRENT_TIME = LocalTime.now();
     public static void main(String[] args) {
 
         // Application assumes correct arguments format
